@@ -1,26 +1,20 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from 'react';
+
+function Test(props) {
+    // useState 参数可以是一个回调函数，可以把初始值当做此函数的返回值
+	const [count, setCount] = useState(() => props.defaultCount || 0);
+	return (
+		<div>
+			<p>
+				{count}
+			</p>
+			<button onClick={() => setCount(count + 1)}>add</button>
+		</div>
+	);
+}
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+	return <Test />;
 }
 
 export default App;
