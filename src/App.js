@@ -1,26 +1,106 @@
-import React from 'react';
-import logo from './logo.svg';
+import React, { useState, useCallback, useRef, useEffect, memo } from 'react';
 import './App.css';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+let idSeq = Date.now();
+const Control = memo(function Control(props) {
+	const { addTodo } = props;
+	const inputRef = useRef();
+	const onSubmit = e => {
+		e.preventDefault();
+		const newText = inputRef.current.value.trim();
+		if (newText.length === 0) {
+			return;
+		}
+		addTodo({
+			id: ++idSeq,
+			text: newText,
+			complete: false
+		});
+
+		inputRef.current.value = '';
+	};
+	return (
+		<div className="control">
+			<h1>todos</h1>
+			<form onSubmit={onSubmit}>
+				<input ref={inputRef} type="text" className="new-todo" placeholder="What needs to be done?" />
+			</form>
+		</div>
+	);
+});
+
+const TodoItem = memo(function TodoItem(props) {
+	const { todo: { id, text, complete }, toggleTodo, removeTodo } = props;
+	const onChange = () => {
+		toggleTodo(id);
+	};
+	const onRemove = () => {
+		removeTodo(id);
+	};
+	return (
+		<li className="todo-item">
+			<input type="checkbox" onChange={onChange} checked={complete} />
+			<label className={complete ? 'complete' : ''}>
+				{text}
+			</label>
+			<button onClick={onRemove}>&#xd7;</button>
+		</li>
+	);
+});
+
+const Todos = memo(function Todos(props) {
+	const { todos, toggleTodo, removeTodo } = props;
+	return (
+		<ul>
+			{todos.map(todo => {
+				return <TodoItem key={todo.id} todo={todo} toggleTodo={toggleTodo} removeTodo={removeTodo} />;
+			})}
+		</ul>
+	);
+});
+
+const LS_KEY = '_$-todos_';
+
+function TodoList() {
+	const [todos, setTodos] = useState([]);
+	const addTodo = useCallback(todo => {
+		setTodos(todos => [...todos, todo]);
+	}, []);
+	const removeTodo = useCallback(id => {
+		setTodos(todos => todos.filter(todo => todo.id !== id));
+	}, []);
+	const toggleTodo = useCallback(id => {
+		setTodos(todos =>
+			todos.map(todo => {
+				// 返回的是一个对象
+				return todo.id === id
+					? {
+							...todo,
+							complete: !todo.complete
+						}
+					: todo;
+			})
+		);
+	}, []);
+	// 注意副作用的顺序
+	useEffect(() => {
+		const todos = JSON.parse(localStorage.getItem(LS_KEY));
+		setTodos(todos);
+	}, []);
+
+	useEffect(
+		() => {
+			localStorage.setItem(LS_KEY, JSON.stringify(todos));
+		},
+		[todos]
+	);
+
+	return (
+		<div className="todo-list">
+			<Control addTodo={addTodo} />
+			<Todos removeTodo={removeTodo} toggleTodo={toggleTodo} todos={todos} />
+		</div>
+	);
 }
 
-export default App;
+export default TodoList;
