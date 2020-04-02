@@ -1,14 +1,29 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
-function Test(props) {
-    // useState 参数可以是一个回调函数，可以把初始值当做此函数的返回值
-	const [count, setCount] = useState(() => props.defaultCount || 0);
+function Test() {
+	const [count, setCount] = useState(0);
+	const onClick = () => {
+		console.log('一旦绑定事件的元素被切换了，这里就失效了');
+	};
+    useEffect(() => {
+        document.querySelector('#size').addEventListener('click', onClick);
+        return () => {
+            document.querySelector('#size').removeEventListener('click', onClick);
+        };
+    }, [count]);
 	return (
 		<div>
 			<p>
 				{count}
 			</p>
-			<button onClick={() => setCount(count + 1)}>add</button>
+			<button
+				onClick={() => {
+					setCount(count + 1);
+				}}
+			>
+				click
+			</button>
+			{count % 2 ? <div id="size">hello world2</div> : <p id="size">hello world1</p>}
 		</div>
 	);
 }
