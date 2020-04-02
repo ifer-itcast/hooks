@@ -2,6 +2,7 @@ import React, { useState, useCallback, useRef, useEffect, memo } from 'react';
 import './App.css';
 
 let idSeq = Date.now();
+// 表单
 const Control = memo(function Control(props) {
 	const { addTodo } = props;
 	const inputRef = useRef();
@@ -23,12 +24,14 @@ const Control = memo(function Control(props) {
 		<div className="control">
 			<h1>todos</h1>
 			<form onSubmit={onSubmit}>
+				{/* 表单只有一个输入框回车即可触发 submit */}
 				<input ref={inputRef} type="text" className="new-todo" placeholder="What needs to be done?" />
 			</form>
 		</div>
 	);
 });
 
+// li
 const TodoItem = memo(function TodoItem(props) {
 	const { todo: { id, text, complete }, toggleTodo, removeTodo } = props;
 	const onChange = () => {
@@ -48,6 +51,7 @@ const TodoItem = memo(function TodoItem(props) {
 	);
 });
 
+// ul
 const Todos = memo(function Todos(props) {
 	const { todos, toggleTodo, removeTodo } = props;
 	return (
@@ -63,12 +67,16 @@ const LS_KEY = '_$-todos_';
 
 function TodoList() {
 	const [todos, setTodos] = useState([]);
+	// 增
 	const addTodo = useCallback(todo => {
+		// 函数的返回值就是要修改的结果
 		setTodos(todos => [...todos, todo]);
 	}, []);
+	// 删
 	const removeTodo = useCallback(id => {
 		setTodos(todos => todos.filter(todo => todo.id !== id));
 	}, []);
+	// 改
 	const toggleTodo = useCallback(id => {
 		setTodos(todos =>
 			todos.map(todo => {
@@ -90,6 +98,7 @@ function TodoList() {
 
 	useEffect(
 		() => {
+			// 初始化和 todos 变化都会执行
 			localStorage.setItem(LS_KEY, JSON.stringify(todos));
 		},
 		[todos]
